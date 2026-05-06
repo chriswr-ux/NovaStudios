@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Nova Studios – FiveM & Rust Development</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    
+    :root {
+      --bg: #000000;
+      --fg: #ffffff;
+      --muted: #b3b3b3;
+      --border: #1a1a1a;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      overflow-x: hidden;
+    }
+
+    a { color: var(--fg); text-decoration: none; }
+
+    /* HEADER */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 1.2rem 4vw;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 20;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .8rem;
+    }
+
+    .logo-mark {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--fg);
+      position: relative;
+      animation: spin 10s linear infinite;
+    }
+
+    @keyframes spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+
+    .logo-mark .petal {
+      position: absolute;
+      width: 60%; height: 60%;
+      border-radius: 50%;
+      border: 1px solid var(--fg);
+      opacity: .7;
+    }
+
+    .logo-mark .petal:nth-child(1) { transform: rotate(0deg) translateY(-40%); }
+    .logo-mark .petal:nth-child(2) { transform: rotate(90deg) translateY(-40%); }
+    .logo-mark .petal:nth-child(3) { transform: rotate(45deg) translateY(-40%); }
+    .logo-mark .petal:nth-child(4) { transform: rotate(-45deg) translateY(-40%); }
+
+    .logo-center {
+      width: 20%; height: 20%;
+      background: var(--fg);
+      border-radius: 50%;
+      position: absolute;
+      top: 40%; left: 40%;
+    }
+
+    nav { display: flex; gap: 1.4rem; }
+    nav a {
+      color: var(--muted);
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+    }
+    nav a:hover { color: var(--fg); }
+
+    /* SECTIONS */
+    section {
+      padding: 6rem 4vw 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .2em;
+      color: var(--muted);
+      margin-bottom: .6rem;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      margin-bottom: 2rem;
+    }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      align-items: center;
+      gap: 3rem;
+      padding-top: 8rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 5vw, 4.4rem);
+      text-transform: uppercase;
+      line-height: 1.05;
+    }
+
+    .hero-title span {
+      font-size: .9rem;
+      color: var(--muted);
+      letter-spacing: .3em;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .hero-sub {
+      margin-top: 1.4rem;
+      max-width: 30rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .hero-tags {
+      margin-top: 1.8rem;
+      display: flex;
+      gap: .6rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      border: 1px solid var(--border);
+      padding: .4rem .9rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      background: #0a0a0a;
+    }
+
+    .hero-cta {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: .7rem 1.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--fg);
+      text-transform: uppercase;
+      font-size: .8rem;
+      letter-spacing: .18em;
+      cursor: pointer;
+      transition: .25s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+    }
+
+    .btn-primary { background: var(--fg); color: #000; }
+    .btn-outline { color: var(--muted); border-color: var(--border); }
+    .btn:hover { background: #fff; color: #000; }
+
+    .hero-3d-card {
+      width: 100%;
+      aspect-ratio: 4/5;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top, #111 0, #000 70%);
+      transform: rotateX(14deg) rotateY(-18deg);
+      transition: .4s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-3d-card::before,
+    .hero-3d-card::after {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle, lch(97.93% 0.01 296.81 / 0.979), transparent);
+      opacity: .5;
+      mix-blend-mode: screen;
+      animation: orbit 18s linear infinite;
+    }
+
+    .hero-3d-card::after {
+      animation-duration: 26s;
+      animation-direction: reverse;
+      opacity: .3;
+    }
+
+    @keyframes orbit {
+      0% { transform: translate3d(-10%, -10%, 0) rotate(0deg); }
+      50% { transform: translate3d(10%, 10%, 0) rotate(180deg); }
+      100% { transform: translate3d(-10%, -10%, 0) rotate(360deg); }
+    }
+
+    /* GENERIC GRID / CARDS */
+    .about-grid,
+    .contact-grid {
+      display: grid;
+      grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+      gap: 2.5rem;
+      align-items: flex-start;
+    }
+
+    .work-grid,
+    .case-grid,
+    .cap-grid,
+    .team-grid,
+    .partners-grid,
+    .socials-grid {
+      display: grid;
+      gap: 1.4rem;
+    }
+
+    .work-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .case-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .cap-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .team-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .partners-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .socials-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+
+    .card-like {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      padding: 1.4rem;
+      border-radius: 16px;
+      transition: .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-like:hover { background: #111; transform: translateY(-4px); }
+
+    /* SHOWCASE THUMBNAILS */
+    .thumb {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: .8rem;
+      border: 1px solid #222;
+    }
+
+    .thumb img {
+      display: block;
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      filter: grayscale(100%);
+    }
+
+    .item-label {
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--muted);
+      margin-bottom: .3rem;
+    }
+
+    .item-title {
+      font-size: .95rem;
+      margin-bottom: .3rem;
+    }
+
+    .item-meta {
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    /* ABOUT */
+    .about-card {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      padding: 1.6rem;
+      border-radius: 18px;
+    }
+
+    .about-card h3 {
+      font-size: .9rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      margin-bottom: .4rem;
+    }
+
+    .about-card p {
+      font-size: .9rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    /* SOCIALS */
+    .social-card {
+      text-align: center;
+      padding: 1.4rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #0a0a0a;
+      transition: .25s;
+    }
+
+    .social-card:hover { background: #111; transform: translateY(-4px); }
+
+    .social-icon svg { opacity: .9; }
+
+    .social-label {
+      margin-top: .6rem;
+      font-size: .8rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--muted);
+    }
+
+    /* PARTNERS */
+    .partner-card {
+      padding: 1.4rem;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: #0a0a0a;
+      text-align: center;
+      transition: .25s;
+    }
+
+    .partner-card:hover { background: #111; transform: translateY(-4px); }
+
+    .partner-name {
+      font-size: 1rem;
+      margin-top: .4rem;
+      color: var(--fg);
+    }
+
+    .partner-tag {
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .2rem;
+    }
+
+    /* CONTACT */
+    .contact-form {
+      background: #0a0a0a;
+      border: 1px solid var(--border);
+      padding: 1.6rem;
+      border-radius: 18px;
+    }
+
+    .contact-form label {
+      display: block;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: var(--muted);
+      margin-bottom: .3rem;
+    }
+
+    .contact-form input,
+    .contact-form textarea {
+      width: 100%;
+      padding: .6rem .8rem;
+      margin-bottom: 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #050505;
+      color: var(--fg);
+      font-family: inherit;
+      font-size: .9rem;
+    }
+
+    .contact-form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .contact-form button { width: 100%; }
+
+    /* FOOTER */
+    footer {
+      padding: 2rem 4vw 3rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: .75rem;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      #hero { grid-template-columns: 1fr; }
+      .about-grid,
+      .contact-grid { grid-template-columns: 1fr; }
+      nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="petal"></div>
+      <div class="petal"></div>
+      <div class="petal"></div>
+      <div class="petal"></div>
+      <div class="logo-center"></div>
+    </div>
+    Nova Studios
+  </div>
+
+  <nav>
+    <a href="#about">About</a>
+    <a href="#work">Work</a>
+    <a href="#projects">Projects</a>
+    <a href="#capabilities">Capabilities</a>
+    <a href="#partners">Partners</a>
+    <a href="#socials">Socials</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div>
+      <h1 class="hero-title">
+        <span>Development Studio</span>
+        Nova Studios
+      </h1>
+      <p class="hero-sub">
+        High‑performance systems for <strong>FiveM</strong> and <strong>Rust</strong>.
+        Engineered for stability, clarity, and speed on live servers.
+      </p>
+
+      <div class="hero-tags">
+        <div class="tag">FiveM</div>
+        <div class="tag">Rust</div>
+        <div class="tag">Optimization</div>
+        <div class="tag">Custom Systems</div>
+      </div>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#socials">Join Community</a>
+        <a class="btn btn-outline" href="#work">View Work</a>
+      </div>
+    </div>
+
+    <div class="hero-3d-card" id="heroCard"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-label">About Us</div>
+    <div class="section-title">Who We Are</div>
+
+    <div class="about-grid">
+      <div>
+        <p>
+          Nova Studios is a focused development team building high‑performance systems
+          for FiveM and Rust. We care about uptime, clarity, and long‑term maintainability.
+        </p>
+        <p style="margin-top:1rem;">
+          We work closely with server owners and communities to design frameworks,
+          gameplay systems, and UI that scale with your player base.
+        </p>
+      </div>
+
+      <div class="about-card">
+        <h3>Mission</h3>
+        <p>Push community‑driven servers beyond “good enough” into truly polished experiences.</p>
+        <h3>Values</h3>
+        <p>Precision • Transparency • Performance • Partnership</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- WORK (CURRENT OFFERINGS) -->
+  <section id="work">
+    <div class="section-label">Work</div>
+    <div class="section-title">Server‑Ready Builds</div>
+
+    <div class="work-grid">
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/600x400?text=CityCore+Framework" alt="CityCore Framework">
+        </div>
+        <div class="item-label">FiveM</div>
+        <div class="item-title">CityCore Framework</div>
+        <div class="item-meta">Economy · Jobs · Inventory · Permissions</div>
+      </div>
+
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/600x400?text=Nova+Dispatch" alt="Nova Dispatch Suite">
+        </div>
+        <div class="item-label">FiveM</div>
+        <div class="item-title">Nova Dispatch Suite</div>
+        <div class="item-meta">Emergency services · UI · Integrations</div>
+      </div>
+
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/600x400?text=Wipe+Architect" alt="Wipe Architect">
+        </div>
+        <div class="item-label">Rust</div>
+        <div class="item-title">Wipe Architect</div>
+        <div class="item-meta">Progression · Events · Balancing</div>
+      </div>
+
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/600x400?text=Anti-Cheat+Layer" alt="Anti-Cheat Layer">
+        </div>
+        <div class="item-label">Rust</div>
+        <div class="item-title">Nova Anti‑Cheat Layer</div>
+        <div class="item-meta">Detection · Telemetry · Alerts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAST PROJECTS / SHOWCASE -->
+  <section id="projects">
+    <div class="section-label">Showcase</div>
+    <div class="section-title">Past Projects</div>
+
+    <div class="case-grid">
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/800x450?text=Eclipse+RP+Overhaul" alt="Eclipse RP Overhaul">
+        </div>
+        <div class="item-label">FiveM</div>
+        <div class="item-title">Eclipse RP Overhaul</div>
+        <div class="item-meta">
+          Full‑stack rebuild of a major city: netcode, jobs, UI, and performance tuning.
+        </div>
+      </div>
+
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/800x450?text=Rust+Arena+Mode" alt="Rust Arena Mode">
+        </div>
+        <div class="item-label">Rust</div>
+        <div class="item-title">Rust Arena Mode</div>
+        <div class="item-meta">
+          Custom game mode with matchmaking, ranked ladders, and server‑side anti‑cheat hooks.
+        </div>
+      </div>
+
+      <div class="card-like">
+        <div class="thumb">
+          <img src="https://via.placeholder.com/800x450?text=Nova+UI+Framework" alt="Nova UI Framework">
+        </div>
+        <div class="item-label">UI / Framework</div>
+        <div class="item-title">Nova UI Framework</div>
+        <div class="item-meta">
+          Monochrome UI kit for immersive servers — HUDs, menus, notifications, modular components.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section id="capabilities">
+    <div class="section-label">Capabilities</div>
+    <div class="section-title">What We Do Best</div>
+
+    <div class="cap-grid">
+      <div class="card-like">
+        <div class="item-title">Server Engineering</div>
+        <div class="item-meta">Tick‑perfect loops, optimized handlers, and scalable architecture.</div>
+      </div>
+      <div class="card-like">
+        <div class="item-title">Custom Systems</div>
+        <div class="item-meta">Jobs, inventories, progression, matchmaking, and more.</div>
+      </div>
+      <div class="card-like">
+        <div class="item-title">UI / UX</div>
+        <div class="item-meta">Clean, monochrome interfaces built for chaotic gameplay.</div>
+      </div>
+      <div class="card-like">
+        <div class="item-title">Security Layers</div>
+        <div class="item-meta">Anti‑cheat hooks, telemetry, detection logic, exploit‑resistant code.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNERS -->
+  <section id="partners">
+    <div class="section-label">Partners</div>
+    <div class="section-title">Trusted By</div>
+
+    <div class="partners-grid">
+      <div class="partner-card">
+        <div class="partner-name">Eclipse RP</div>
+        <div class="partner-tag">FiveM Roleplay Network</div>
+      </div>
+      <div class="partner-card">
+        <div class="partner-name">RustArena</div>
+        <div class="partner-tag">Competitive Rust Servers</div>
+      </div>
+      <div class="partner-card">
+        <div class="partner-name">CityCore</div>
+        <div class="partner-tag">Framework Partner</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIALS -->
+  <section id="socials">
+    <div class="section-label">Socials</div>
+    <div class="section-title">Connect With Us</div>
+
+    <div class="socials-grid">
+      <a class="social-card" href="https://github.com" target="_blank">
+        <div class="social-icon">
+          <!-- GitHub Icon -->
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+            <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.2-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 .1.6 2.1 2.8 2.1 1.1 0 1.9-.4 2.4-.8-.9-.1-1.8-.4-2.5-.9-1.5-.9-2.5-2.6-2.5-4.5 0-1 .3-1.9.9-2.7-.1-.2-.4-1.2.1-2.5 0 0 .8-.3 2.7 1 .8-.2 1.6-.3 2.4-.3s1.6.1 2.4.3c1.9-1.3 2.7-1 2.7-1 .5 1.3.2 2.3.1 2.5.6.8.9 1.7.9 2.7 0 1.9-1 3.6-2.5 4.5-.7.5-1.6.8-2.5.9.5.4 1.3.8 2.4.8 2.2 0 2.8-2 2.8-2.1 0 0 .6-1.1 1.7-1.2 0 0 1.1 0 .1.7 0 0-.7.4-1.2 1.6 0 0-.7 2.1-3.9 1.4v2c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.65 18.35.5 12 .5z"/>
+          </svg>
+        </div>
+        <div class="social-label">GitHub</div>
+      </a>
+
+      <a class="social-card" href="https://youtube.com" target="_blank">
+        <div class="social-icon">
+          <!-- YouTube Icon -->
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+            <path d="M23.5 6.2s-.2-1.7-.9-2.4c-.9-.9-1.9-.9-2.4-1C16.7 2.5 12 2.5 12 2.5h-.1s-4.7 0-8.2.3c-.5.1-1.5.1-2.4 1-.7.7-.9 2.4-.9 2.4S0 8.1 0 10v1.9c0 1.9.2 3.8.2 3.8s.2 1.7.9 2.4c.9.9 2.1.9 2.6 1 1.9.2 8.1.3 8.1.3s4.7 0 8.2-.3c.5-.1 1.5-.1 2.4-1 .7-.7.9-2.4.9-2.4s.2-1.9.2-3.8V10c0-1.9-.2-3.8-.2-3.8zM9.7 14.8V8.9l6.3 2.9-6.3 3z"/>
+          </svg>
+        </div>
+        <div class="social-label">YouTube</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-label">Contact</div>
+    <div class="section-title">Work With Nova</div>
+
+    <div class="contact-grid">
+      <div>
+        <p>
+          Tell us about your server, your current stack, and what you want your players to feel.
+        </p>
+        <p style="margin-top:1rem;">
+          We typically respond within 24–48 hours with next steps, timelines, and a clear technical plan.
+        </p>
+      </div>
+
+      <div class="contact-form">
+        <form>
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Your name" />
+
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" />
+
+          <label for="server">Server / Project</label>
+          <input id="server" type="text" placeholder="Server name or project" />
+
+          <label for="message">Project details</label>
+          <textarea id="message" placeholder="Describe your server, goals, and timeline."></textarea>
+
+          <button type="submit" class="btn btn-primary">Send Inquiry</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  © Nova Studios — FiveM & Rust Development
+</footer>
+
+<script>
+  // Simple 3D tilt on hero card
+  const card = document.getElementById("heroCard");
+  if (card) {
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const midX = rect.width / 2;
+      const midY = rect.height / 2;
+      const rotateY = ((x - midX) / midX) * -10;
+      const rotateX = ((y - midY) / midY) * 10;
+      card.style.transform = "rotateX(" + rotateX + "deg) rotateY(" + rotateY + "deg)";
+    });
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "rotateX(14deg) rotateY(-18deg)";
+    });
+  }
+</script>
+
+</body>
+</html>
+
+
